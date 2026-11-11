@@ -20,138 +20,118 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Advanced Biotech CSS & Bacteria Animations
+# 2. Advanced Biotech CSS & Animations
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
 
-    html, body, [class*="css"] {
-        font-family: 'Space Grotesk', sans-serif;
-    }
+html, body, [class*="css"] {
+    font-family: 'Space Grotesk', sans-serif;
+}
 
-    /* Hero Banner Card */
-    .hero-container {
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.90) 100%);
-        border: 1px solid rgba(56, 189, 248, 0.35);
-        border-radius: 20px;
-        padding: 30px 35px;
-        margin-bottom: 25px;
-        box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.3);
-    }
+.hero-box {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.25);
+}
 
-    .hero-title {
-        font-size: 2.2rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, #38bdf8, #818cf8, #34d399);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 6px;
-    }
+.hero-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #38bdf8;
+    margin-bottom: 6px;
+}
 
-    .hero-subtitle {
-        color: #94a3b8;
-        font-size: 1.05rem;
-        margin-bottom: 14px;
-    }
+.hero-sub {
+    color: #94a3b8;
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
 
-    .badge-author {
-        display: inline-flex;
-        align-items: center;
-        background: rgba(14, 165, 233, 0.15);
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        color: #38bdf8;
-        padding: 6px 14px;
-        border-radius: 9999px;
-        font-size: 0.88rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
+.author-chip {
+    display: inline-block;
+    background: rgba(14, 165, 233, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
 
-    /* Floating Bacteria Animation Elements */
-    .bact {
-        position: absolute;
-        opacity: 0.25;
-        animation: floatAround 14s infinite ease-in-out alternate;
-    }
+.bact-icon {
+    position: absolute;
+    opacity: 0.22;
+    animation: floatBact 8s infinite ease-in-out alternate;
+}
 
-    .bact-1 { top: 10%; right: 5%; width: 50px; animation-duration: 9s; }
-    .bact-2 { bottom: 15%; right: 18%; width: 35px; animation-duration: 13s; animation-delay: 2s; }
-    .bact-3 { top: 35%; right: 30%; width: 25px; animation-duration: 11s; animation-delay: 1s; }
+.bact-pos1 { top: 12px; right: 24px; width: 44px; animation-duration: 6s; }
+.bact-pos2 { bottom: 12px; right: 90px; width: 34px; animation-duration: 9s; animation-delay: 1.5s; }
 
-    @keyframes floatAround {
-        0% { transform: translateY(0px) rotate(0deg) scale(1); }
-        50% { transform: translateY(-18px) translateX(10px) rotate(45deg) scale(1.1); }
-        100% { transform: translateY(10px) translateX(-15px) rotate(-30deg) scale(0.95); }
-    }
+@keyframes floatBact {
+    0% { transform: translateY(0px) rotate(0deg); }
+    100% { transform: translateY(-14px) rotate(35deg); }
+}
 
-    /* Custom Bacteria Loader Animation */
-    .bact-loader {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 25px;
-        margin: 15px 0;
-        border-radius: 16px;
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px dashed rgba(56, 189, 248, 0.4);
-    }
+.bact-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    margin: 15px 0;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px dashed #38bdf8;
+}
 
-    .bact-split {
-        width: 32px;
-        height: 18px;
-        background: #38bdf8;
-        border-radius: 12px;
-        position: relative;
-        animation: bacteriaDivide 1.4s infinite ease-in-out;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
-    }
+.bact-cell {
+    width: 32px;
+    height: 18px;
+    background: #38bdf8;
+    border-radius: 12px;
+    animation: cellDivide 1.2s infinite ease-in-out;
+    box-shadow: 0 0 15px #38bdf8;
+}
 
-    @keyframes bacteriaDivide {
-        0% { transform: scale(1); width: 32px; border-radius: 12px; }
-        45% { width: 52px; border-radius: 14px; }
-        50% { width: 52px; transform: scale(1.1); box-shadow: 0 0 25px #34d399; }
-        100% { transform: scale(1); width: 32px; border-radius: 12px; }
-    }
+@keyframes cellDivide {
+    0% { width: 30px; }
+    50% { width: 50px; background: #34d399; box-shadow: 0 0 20px #34d399; }
+    100% { width: 30px; }
+}
 
-    .loader-text {
-        margin-top: 14px;
-        font-size: 0.95rem;
-        color: #38bdf8;
-        font-weight: 600;
-        letter-spacing: 0.8px;
-    }
+.loader-msg {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: #38bdf8;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Hero Frontline Section with Integrated Floating Bacteria SVGs
-st.markdown("""
-<div class="hero-container">
-    <div class="bact bact-1">
-        <svg viewBox="0 0 100 50" fill="#38bdf8"><rect x="10" y="10" width="80" height="30" rx="15" /></svg>
-    </div>
-    <div class="bact bact-2">
-        <svg viewBox="0 0 100 50" fill="#34d399"><rect x="10" y="10" width="80" height="30" rx="15" /></svg>
-    </div>
-    <div class="bact bact-3">
-        <svg viewBox="0 0 50 50" fill="#818cf8"><circle cx="25" cy="25" r="20" /></svg>
-    </div>
-    
-    <div class="hero-title">Automated Colony Counter & Phenotyping Suite</div>
-    <div class="hero-subtitle">High-throughput Petri dish colony quantification, watershed segmentation & multi-strain color profiling.</div>
-    <div class="badge-author">
-        🔬 Developed by Sahil Kumar &nbsp;|&nbsp; Biotechnology AI Suite
-    </div>
+# 3. Clean Render Hero Frontline Banner (No Indentation)
+hero_html = """
+<div class="hero-box">
+<div class="bact-icon bact-pos1"><svg viewBox="0 0 100 50" fill="#38bdf8"><rect x="10" y="10" width="80" height="30" rx="15" /></svg></div>
+<div class="bact-icon bact-pos2"><svg viewBox="0 0 100 50" fill="#34d399"><rect x="10" y="10" width="80" height="30" rx="15" /></svg></div>
+<div class="hero-title">Automated Colony Counter & Phenotyping Suite</div>
+<div class="hero-sub">High-throughput Petri dish colony quantification, watershed segmentation & multi-strain color profiling.</div>
+<div class="author-chip">🔬 Developed by Sahil Kumar &nbsp;|&nbsp; Biotechnology AI Suite</div>
 </div>
-""", unsafe_allow_html=True)
+"""
+st.markdown(hero_html, unsafe_allow_html=True)
 
 # --- SIDEBAR CONTROLS ---
 st.sidebar.header("⚙️ 1. Detection Sensitivity")
 colony_type = st.sidebar.radio("Colony Appearance", ["Bright colonies on Dark Agar", "Dark colonies on Light Agar"])
 sensitivity = st.sidebar.slider("Detection Sensitivity", min_value=-30, max_value=30, value=5, step=1,
-                               help="Colonies miss hone par increase karein.")
+                               help="Colonies miss hone par is slider ko increase karein.")
 min_area = st.sidebar.number_input("Min Colony Area (px²)", min_value=1, max_value=2000, value=3)
 max_area = st.sidebar.number_input("Max Colony Area (px²)", min_value=50, max_value=100000, value=15000)
 
@@ -163,7 +143,7 @@ circularity_threshold = st.sidebar.slider("Morphology Cutoff (Circularity)", 0.2
 st.sidebar.header("🔢 3. Microbiology CFU Calculator")
 calc_cfu = st.sidebar.checkbox("Calculate CFU/mL", value=False)
 if calc_cfu:
-    dilution_factor = st.sidebar.number_input("Dilution Factor (e.g., 1000 for 10^-3)", min_value=1.0, value=100.0)
+    dilution_factor = st.sidebar.number_input("Dilution Factor (e.g. 1000 for 10^-3)", min_value=1.0, value=100.0)
     plated_volume = st.sidebar.number_input("Volume Plated (in mL)", min_value=0.001, max_value=10.0, value=0.1)
 
 # Helper: Color Classification
@@ -248,28 +228,28 @@ def generate_pdf_report(sample_id, analyst_name, total_count, cfu_val, df_summar
     pdf_buffer.seek(0)
     return pdf_buffer
 
-# --- MAIN APP LOGIC ---
+# --- MAIN APP FLOW ---
 uploaded_file = st.file_uploader("📂 Select Petri Dish Culture Plate", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Custom Animated Bacteria Loader
-    loader_placeholder = st.empty()
-    loader_placeholder.markdown("""
-    <div class="bact-loader">
-        <div class="bact-split"></div>
-        <div class="loader-text">AI SCANNING PETRI DISH • DETECTING BACTERIAL CELL MORPHOLOGY...</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Smooth UX pause for visual animation
-    time.sleep(1.2)
+    # Custom Bacteria Division Loader
+    loader_ph = st.empty()
+    loader_ph.markdown("""
+<div class="bact-loader">
+<div class="bact-cell"></div>
+<div class="loader-msg">SCANNING CULTURE PLATE • IDENTIFYING BACTERIAL COLONIES...</div>
+</div>
+""", unsafe_allow_html=True)
+    time.sleep(1.0)
 
     raw_image = Image.open(uploaded_file).convert("RGB")
     image_array = np.array(raw_image)
     h, w, _ = image_array.shape
 
-    # Process image
+    # 1. Circular ROI
     petri_mask, center, p_radius = get_circular_roi(image_array.shape)
+
+    # 2. Image Processing
     gray = cv2.cvtColor(image_array, cv2.COLOR_RGB2GRAY)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     enhanced_gray = clahe.apply(gray)
@@ -385,9 +365,7 @@ if uploaded_file is not None:
                     })
                     c_id += 1
 
-    # Remove loader after processing is finished
-    loader_placeholder.empty()
-
+    loader_ph.empty()
     auto_count = len(colony_data)
 
     # 4. Technician Override
@@ -395,7 +373,6 @@ if uploaded_file is not None:
     manual_adjust = st.sidebar.number_input("Manual Adjustment (+/-)", min_value=-auto_count, max_value=1000, value=0)
     final_count = auto_count + manual_adjust
 
-    # Side-by-side visualization
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Raw Culture Plate")
@@ -404,7 +381,6 @@ if uploaded_file is not None:
         st.subheader("AI Segmentation & Detection")
         st.image(output_image, caption=f"Detected: {auto_count} Colonies", use_container_width=True)
 
-    # Metrics
     st.divider()
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Auto Detected", auto_count)
