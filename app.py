@@ -364,4 +364,4 @@ if nav_choice == "🔬 Analyze New Plate":
         exp_col1.download_button("📥 Download Colony CSV", csv_data, f"{clean_name}_colonies.csv", "text/csv", use_container_width=True)
         exp_col2.download_button("🖼️ Download Annotated PNG", png_bytes, f"{clean_name}_annotated.png", "image/png", use_container_width=True)
     else:
-        st.info("👆 Upload a Petri dish / agar plate photo above to start automated counting. Every upload is automatically saved in 🕒 
+        st.info("👆 Upload a Petri dish / agar plate photo above to start automated counting. Every upload is automatically saved in 🕒 History!")
