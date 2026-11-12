@@ -36,7 +36,7 @@ st.markdown("""
         color: #f8fafc !important;
     }
 
-    /* FIX 1: Sidebar Expander Header White Box Fix */
+    /* Sidebar Expander Header Fix */
     [data-testid="stExpander"] {
         background: #0f172a !important;
         border: 1.5px solid rgba(56, 189, 248, 0.45) !important;
@@ -62,7 +62,7 @@ st.markdown("""
         font-size: 16px !important;
     }
 
-    /* FIX 2: All Buttons (History, Upload, Download) Dark Neon Styling */
+    /* All Buttons Dark Neon Styling */
     .stButton > button,
     .stDownloadButton > button,
     button[data-testid="stBaseButton-secondary"],
@@ -77,7 +77,7 @@ st.markdown("""
     }
     .stButton > button *,
     .stDownloadButton > button *,
-     button[data-testid="stBaseButton-secondary"] * {
+    button[data-testid="stBaseButton-secondary"] * {
         color: #ffffff !important;
         font-weight: 700 !important;
     }
@@ -87,7 +87,7 @@ st.markdown("""
         box-shadow: 0 0 24px rgba(52, 211, 153, 0.7) !important;
     }
 
-    /* FIX 3: Number Input Box & +/- Step Buttons Visibility */
+    /* Number Input Box & +/- Step Buttons Visibility */
     [data-testid="stNumberInput"] input,
     div[data-baseweb="input"] input {
         background-color: #1e293b !important;
@@ -107,22 +107,35 @@ st.markdown("""
         stroke: #ffffff !important;
     }
 
-    /* FIX 4: File Uploader Box & Text */
+    /* FIX: Upload Agar Plate Image Label & Box High-Contrast Neon Color */
     [data-testid="stFileUploader"] {
-        background: rgba(15, 23, 42, 0.9) !important;
+        background: rgba(15, 23, 42, 0.92) !important;
         border: 2px dashed #38bdf8 !important;
         border-radius: 16px !important;
-        padding: 16px !important;
+        padding: 18px !important;
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.18) !important;
+    }
+    [data-testid="stFileUploader"] label,
+    [data-testid="stFileUploader"] label p,
+    [data-testid="stFileUploader"] label span,
+    [data-testid="stFileUploader"] [data-testid="stWidgetLabel"],
+    [data-testid="stFileUploader"] [data-testid="stWidgetLabel"] p {
+        color: #38bdf8 !important;
+        font-size: 19px !important;
+        font-weight: 800 !important;
+        text-shadow: 0 0 12px rgba(56, 189, 248, 0.55) !important;
+        opacity: 1 !important;
     }
     [data-testid="stFileUploaderDropzone"] {
         background: #1e293b !important;
         border-radius: 12px !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        border: 1px solid rgba(56, 189, 248, 0.4) !important;
     }
     [data-testid="stFileUploaderDropzone"] div,
     [data-testid="stFileUploaderDropzone"] span,
     [data-testid="stFileUploaderDropzone"] small {
         color: #f8fafc !important;
+        font-weight: 600 !important;
     }
     [data-testid="stFileUploaderDropzone"] button {
         background: linear-gradient(90deg, #0284c7, #38bdf8) !important;
@@ -131,7 +144,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* Custom High-Contrast Prompt Box (Replaces White st.info) */
+    /* Custom High-Contrast Prompt Box */
     .neon-prompt-box {
         background: rgba(15, 23, 42, 0.92);
         border: 1.5px solid #38bdf8;
@@ -145,22 +158,40 @@ st.markdown("""
         margin-top: 12px;
     }
 
-    /* Center Glowing Holographic Microscope Watermark */
+    /* Center Glowing Microscope + "CREATED BY SAHIL" Watermark */
     .microscope-watermark {
         position: fixed;
-        top: 55%;
+        top: 58%;
         left: 55%;
         transform: translate(-50%, -50%);
-        width: 350px;
-        height: 350px;
-        opacity: 0.28;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.34;
         pointer-events: none;
         z-index: 0;
+        user-select: none;
         animation: pulseGlow 4s infinite ease-in-out;
     }
+    .microscope-watermark svg {
+        width: 310px;
+        height: 310px;
+    }
+    .watermark-text {
+        margin-top: 8px;
+        font-size: 26px !important;
+        font-weight: 900 !important;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        color: #38bdf8 !important;
+        text-shadow: 0 0 12px #38bdf8, 0 0 25px #0284c7, 0 0 40px #34d399;
+        white-space: nowrap;
+        text-align: center;
+    }
     @keyframes pulseGlow {
-        0%, 100% { filter: drop-shadow(0 0 20px #38bdf8) drop-shadow(0 0 45px #0284c7); transform: translate(-50%, -50%) scale(1); }
-        50% { filter: drop-shadow(0 0 35px #22d3ee) drop-shadow(0 0 70px #34d399); transform: translate(-50%, -50%) scale(1.06); }
+        0%, 100% { filter: drop-shadow(0 0 18px #38bdf8) drop-shadow(0 0 40px #0284c7); transform: translate(-50%, -50%) scale(1); }
+        50% { filter: drop-shadow(0 0 32px #22d3ee) drop-shadow(0 0 65px #34d399); transform: translate(-50%, -50%) scale(1.05); }
     }
 
     /* 14 Fast-Moving Glowing Microbes Background */
@@ -180,7 +211,7 @@ st.markdown("""
         opacity: 0.55;
     }
     .b1  { width: 52px; height: 18px; background: #38bdf8; box-shadow: 0 0 18px #38bdf8, 0 0 32px #0284c7; top: 12%; left: 8%;  animation: swimA 10s infinite ease-in-out alternate; }
-        .b2  { width: 30px; height: 30px; background: #34d399; box-shadow: 0 0 18px #34d399, 0 0 32px #059669; top: 68%; left: 15%; border-radius: 50%; animation: swimB 12s infinite ease-in-out alternate; }
+    .b2  { width: 30px; height: 30px; background: #34d399; box-shadow: 0 0 18px #34d399, 0 0 32px #059669; top: 68%; left: 15%; border-radius: 50%; animation: swimB 12s infinite ease-in-out alternate; }
     .b3  { width: 60px; height: 20px; background: #c084fc; box-shadow: 0 0 18px #c084fc, 0 0 32px #9333ea; top: 25%; left: 78%; animation: swimC 11s infinite ease-in-out alternate; }
     .b4  { width: 26px; height: 26px; background: #f472b6; box-shadow: 0 0 18px #f472b6, 0 0 32px #db2777; top: 78%; left: 72%; border-radius: 50%; animation: swimA 9s infinite ease-in-out alternate; }
     .b5  { width: 46px; height: 16px; background: #fbbf24; box-shadow: 0 0 18px #fbbf24, 0 0 32px #d97706; top: 48%; left: 42%; animation: swimB 13s infinite ease-in-out alternate; }
@@ -237,6 +268,7 @@ st.markdown("""
         <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>
         <circle cx="10" cy="18" r="1.5" fill="#34d399"/>
     </svg>
+    <div class="watermark-text">CREATED BY SAHIL</div>
 </div>
 """, unsafe_allow_html=True)
 
