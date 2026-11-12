@@ -1,5 +1,4 @@
 import io
-import time
 from datetime import datetime
 import cv2
 import numpy as np
@@ -15,23 +14,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Session State Initialization for History Tracking
+# 2. Session State for History
 if "history" not in st.session_state:
     st.session_state["history"] = []
-
 if "view_history_idx" not in st.session_state:
     st.session_state["view_history_idx"] = None
-
 if "last_processed_file" not in st.session_state:
     st.session_state["last_processed_file"] = None
 
-# 3. High-Contrast CSS + Floating Bacteria + Center Microscope Watermark
+# 3. High-Contrast CSS + Glowing Microscope + Larger Typography
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 .stApp {
-    background: radial-gradient(circle at 15% 20%, #09192f 0%, #040b16 55%, #02060d 100%) !important;
+    background: radial-gradient(circle at 20% 15%, #0b213f 0%, #050d1a 55%, #02060d 100%) !important;
     font-family: 'Inter', sans-serif;
     color: #F8FAFC !important;
 }
@@ -41,21 +38,27 @@ st.markdown("""
     z-index: 2;
 }
 
-/* Center Microscope Watermark */
-.center-microscope-watermark {
+/* Glowing Center Microscope Watermark */
+.center-microscope-glow {
     position: fixed;
-    top: 50%;
+    top: 54%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 260px;
-    opacity: 0.05;
+    width: 310px;
+    height: 310px;
+    opacity: 0.22;
     pointer-events: none;
     z-index: 1;
-    user-select: none;
-    filter: drop-shadow(0 0 50px rgba(56, 189, 248, 0.5));
+    filter: drop-shadow(0 0 22px #38BDF8) drop-shadow(0 0 48px #34D399);
+    animation: pulseGlow 4s ease-in-out infinite alternate;
 }
 
-/* Floating Bacteria Background */
+@keyframes pulseGlow {
+    0% { opacity: 0.16; filter: drop-shadow(0 0 18px #38BDF8) drop-shadow(0 0 35px #34D399); }
+    100% { opacity: 0.28; filter: drop-shadow(0 0 28px #38BDF8) drop-shadow(0 0 60px #34D399); }
+}
+
+/* Floating Multi-Color Bacteria Background */
 .bio-bg {
     position: fixed;
     top: 0;
@@ -69,20 +72,19 @@ st.markdown("""
 
 .bacterium {
     position: absolute;
-    opacity: 0.38;
-    filter: blur(0.5px);
+    opacity: 0.45;
     animation: swim linear infinite;
 }
 
-.bacillus { width: 48px; height: 16px; border-radius: 20px; }
-.coccus { width: 22px; height: 22px; border-radius: 50%; }
-.diplococcus { width: 34px; height: 18px; border-radius: 12px; border-style: dashed !important; }
+.bacillus { width: 54px; height: 18px; border-radius: 20px; }
+.coccus { width: 24px; height: 24px; border-radius: 50%; }
+.diplococcus { width: 38px; height: 20px; border-radius: 12px; border-style: dashed !important; }
 
-.c-cyan { background: rgba(56, 189, 248, 0.28); border: 2px solid #38BDF8; box-shadow: 0 0 18px rgba(56, 189, 248, 0.65); }
-.c-green { background: rgba(52, 211, 153, 0.28); border: 2px solid #34D399; box-shadow: 0 0 18px rgba(52, 211, 153, 0.65); }
-.c-purple { background: rgba(192, 132, 252, 0.28); border: 2px solid #C084FC; box-shadow: 0 0 18px rgba(192, 132, 252, 0.65); }
-.c-amber { background: rgba(251, 191, 36, 0.28); border: 2px solid #FBBF24; box-shadow: 0 0 18px rgba(251, 191, 36, 0.65); }
-.c-pink { background: rgba(244, 114, 182, 0.28); border: 2px solid #F472B6; box-shadow: 0 0 18px rgba(244, 114, 182, 0.65); }
+.c-cyan { background: rgba(56, 189, 248, 0.3); border: 2px solid #38BDF8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.75); }
+.c-green { background: rgba(52, 211, 153, 0.3); border: 2px solid #34D399; box-shadow: 0 0 20px rgba(52, 211, 153, 0.75); }
+.c-purple { background: rgba(192, 132, 252, 0.3); border: 2px solid #C084FC; box-shadow: 0 0 20px rgba(192, 132, 252, 0.75); }
+.c-amber { background: rgba(251, 191, 36, 0.3); border: 2px solid #FBBF24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.75); }
+.c-pink { background: rgba(244, 114, 182, 0.3); border: 2px solid #F472B6; box-shadow: 0 0 20px rgba(244, 114, 182, 0.75); }
 
 @keyframes swim {
     0% { transform: translateY(110vh) translateX(0px) rotate(0deg); }
@@ -90,83 +92,191 @@ st.markdown("""
     100% { transform: translateY(-15vh) translateX(-30px) rotate(360deg); }
 }
 
-/* Sidebar & Form Labels */
+/* Fix All Text & Widget Colors */
 [data-testid="stSidebar"] {
-    background-color: rgba(8, 16, 32, 0.94) !important;
-    backdrop-filter: blur(14px);
-    border-right: 1px solid rgba(56, 189, 248, 0.25);
+    background-color: #071122 !important;
+    border-right: 1px solid rgba(56, 189, 248, 0.35);
     z-index: 3;
 }
 
-[data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] label {
-    color: #38BDF8 !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] p {
+    color: #34D399 !important;
 }
 
+/* Fix White Expander Header Bug */
 [data-testid="stExpander"] {
-    background-color: rgba(15, 23, 42, 0.85) !important;
-    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    background-color: #0F172A !important;
+    border: 1px solid #38BDF8 !important;
     border-radius: 12px !important;
 }
 
-[data-testid="stExpander"] summary span {
+[data-testid="stExpander"] summary {
+    background-color: #1E293B !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+}
+
+[data-testid="stExpander"] summary span,
+[data-testid="stExpander"] summary p {
     color: #FBBF24 !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+}
+
+/* Slider & Input Labels */
+[data-testid="stWidgetLabel"] p,
+[data-testid="stWidgetLabel"] label {
+    color: #38BDF8 !important;
     font-weight: 600 !important;
+    font-size: 15px !important;
 }
 
-[data-testid="stFileUploader"] section {
-    background-color: rgba(15, 23, 42, 0.88) !important;
-    border: 1.5px dashed #38BDF8 !important;
-    border-radius: 14px !important;
+/* Checkbox Text */
+[data-testid="stCheckbox"] label p {
+    color: #F8FAFC !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
 }
 
-[data-testid="stFileUploader"] section div, [data-testid="stFileUploader"] section span {
-    color: #E2E8F0 !important;
-}
-
-/* Hero Header & Watermarks */
-.hero-card {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 41, 59, 0.78) 100%);
-    backdrop-filter: blur(16px);
+/* Radio Navigation Buttons Fix */
+[data-testid="stRadio"] > div {
+    background: rgba(15, 23, 42, 0.9);
+    padding: 10px 16px;
+    border-radius: 14px;
     border: 1px solid rgba(56, 189, 248, 0.4);
-    border-radius: 18px;
-    padding: 24px 28px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+}
+
+[data-testid="stRadio"] label p {
+    color: #F8FAFC !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+}
+
+/* File Uploader & Browse Button Fix */
+[data-testid="stFileUploader"] section {
+    background-color: rgba(15, 23, 42, 0.92) !important;
+    border: 2px dashed #38BDF8 !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+}
+
+[data-testid="stFileUploader"] section div,
+[data-testid="stFileUploader"] section span,
+[data-testid="stFileUploader"] section small {
+    color: #F1F5F9 !important;
+    font-size: 15px !important;
+}
+
+[data-testid="stFileUploader"] button {
+    background: linear-gradient(90deg, #0284C7, #0D9488) !important;
+    color: #FFFFFF !important;
+    border: 1px solid #38BDF8 !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    padding: 8px 18px !important;
+}
+
+/* Hero Banner (Larger Text) */
+.hero-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.85) 100%);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(56, 189, 248, 0.5);
+    border-radius: 20px;
+    padding: 30px 32px;
+    margin-bottom: 22px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(52, 211, 153, 0.2);
+    color: #34D399 !important;
+    border: 1px solid #34D399;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
 }
 
 .hero-title {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 700;
     background: linear-gradient(90deg, #38BDF8, #34D399, #C084FC);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin: 0 0 6px 0;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
 }
 
-.result-card {
-    background: rgba(15, 23, 42, 0.85);
+.hero-sub {
+    color: #F1F5F9 !important;
+    font-size: 17px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Feature & Info Cards (Larger to fill space cleanly) */
+.info-card {
+    background: rgba(15, 23, 42, 0.88);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    border-radius: 14px;
-    padding: 18px 12px;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 16px;
+    padding: 24px 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+}
+
+.info-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.info-card p, .info-card li {
+    color: #E2E8F0 !important;
+    font-size: 15.5px;
+    line-height: 1.6;
+    margin-bottom: 6px;
+}
+
+/* Result Metric Cards */
+.result-card {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1.5px solid rgba(56, 189, 248, 0.4);
+    border-radius: 16px;
+    padding: 22px 14px;
     text-align: center;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .res-value {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
 }
 
 .res-label {
-    font-size: 12px;
-    color: #CBD5E1 !important;
+    font-size: 13px;
+    color: #E2E8F0 !important;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
+}
+
+/* Bottom Footer Banner & Floating Watermark */
+.bottom-footer {
+    margin-top: 32px;
+    background: linear-gradient(90deg, rgba(15, 23, 42, 0.92), rgba(14, 116, 144, 0.25), rgba(15, 23, 42, 0.92));
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 16px;
+    padding: 20px 24px;
+    text-align: center;
 }
 
 .sahil-watermark {
@@ -174,112 +284,89 @@ st.markdown("""
     bottom: 14px;
     left: 16px;
     z-index: 9999;
-    background: rgba(15, 23, 42, 0.88);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(56, 189, 248, 0.45);
-    padding: 6px 14px;
+    background: rgba(7, 17, 34, 0.94);
+    border: 1.5px solid #38BDF8;
+    padding: 7px 16px;
     border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     color: #38BDF8 !important;
-    letter-spacing: 0.6px;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.4);
     pointer-events: none;
 }
 .sahil-watermark span { color: #34D399 !important; }
-
-/* History Table Card */
-.history-item-card {
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 </style>
 
-<!-- Floating Microscope Watermark in Center -->
-<div class="center-microscope-watermark">🔬</div>
+<!-- Glowing Neon Microscope Watermark in Center -->
+<div class="center-microscope-glow">
+<svg viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 18h8"/>
+<path d="M3 22h18"/>
+<path d="M14 22a7 7 0 1 0 0-14h-1"/>
+<path d="M9 14h2"/>
+<path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/>
+<path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>
+<circle cx="15" cy="15" r="1.5" stroke="#34D399"/>
+</svg>
+</div>
 
-<!-- Animated Multi-Color Bacteria in Background -->
+<!-- Animated Multi-Color Bacteria Background -->
 <div class="bio-bg">
-<div class="bacterium bacillus c-cyan" style="left: 6%; animation-duration: 18s; animation-delay: 0s;"></div>
-<div class="bacterium coccus c-green" style="left: 15%; animation-duration: 14s; animation-delay: 3s;"></div>
-<div class="bacterium bacillus c-purple" style="left: 26%; animation-duration: 22s; animation-delay: 1s;"></div>
-<div class="bacterium diplococcus c-amber" style="left: 38%; animation-duration: 16s; animation-delay: 5s;"></div>
-<div class="bacterium coccus c-pink" style="left: 49%; animation-duration: 19s; animation-delay: 2s;"></div>
-<div class="bacterium bacillus c-green" style="left: 61%; animation-duration: 15s; animation-delay: 4s;"></div>
-<div class="bacterium coccus c-cyan" style="left: 72%; animation-duration: 21s; animation-delay: 0.5s;"></div>
-<div class="bacterium bacillus c-pink" style="left: 83%; animation-duration: 17s; animation-delay: 6s;"></div>
-<div class="bacterium diplococcus c-purple" style="left: 91%; animation-duration: 20s; animation-delay: 2.5s;"></div>
+<div class="bacterium bacillus c-cyan" style="left: 5%; animation-duration: 18s; animation-delay: 0s;"></div>
+<div class="bacterium coccus c-green" style="left: 16%; animation-duration: 14s; animation-delay: 2s;"></div>
+<div class="bacterium bacillus c-purple" style="left: 28%; animation-duration: 21s; animation-delay: 1s;"></div>
+<div class="bacterium diplococcus c-amber" style="left: 40%; animation-duration: 16s; animation-delay: 4s;"></div>
+<div class="bacterium coccus c-pink" style="left: 52%; animation-duration: 19s; animation-delay: 2s;"></div>
+<div class="bacterium bacillus c-green" style="left: 64%; animation-duration: 15s; animation-delay: 3s;"></div>
+<div class="bacterium coccus c-cyan" style="left: 75%; animation-duration: 20s; animation-delay: 0.5s;"></div>
+<div class="bacterium bacillus c-pink" style="left: 86%; animation-duration: 17s; animation-delay: 5s;"></div>
+<div class="bacterium diplococcus c-purple" style="left: 92%; animation-duration: 22s; animation-delay: 1.5s;"></div>
 </div>
 
 <div class="sahil-watermark">🧬 Created by <span>Sahil Kumar</span></div>
 
 <div class="hero-card">
+<div class="hero-badge">🔬 AUTOMATED MICROBIOLOGY & BIOINFORMATICS SUITE</div>
 <h1 class="hero-title">BioCount AI — Bacterial Colony Counter</h1>
-<p style="color:#CBD5E1; margin:0;">Created by <b style="color:#34D399;">Sahil Kumar</b> • Automated Colony Enumeration, Sizing & Instant Plate History Archive</p>
+<p class="hero-sub">Created by <b style="color:#34D399;">Sahil Kumar</b> • High-precision OpenCV colony segmentation, morphological sizing, CFU/mL calculation, and instant plate history archive.</p>
 </div>
 """, unsafe_allow_html=True)
 
-# 4. Top Navigation Bar (Switch between Live Scanner and Plate History)
+# 4. Top Navigation Mode Switcher
 nav_choice = st.radio(
-    "Select Mode",
+    "Navigation Mode",
     ["🔬 Analyze New Plate", f"📜 Plate History Archive ({len(st.session_state['history'])})"],
     horizontal=True,
     label_visibility="collapsed"
 )
 
-# 5. Helper Function to Render Detailed Results
+# 5. Function to Render Full Report
 def display_full_report(record):
-    st.markdown(f"### 📋 Plate Report: `{record['filename']}`")
-    st.caption(f"Analyzed on: {record['timestamp']} | Parameters: Dilution 10⁻{record['dilution_exp']}, Vol: {record['plating_vol']} mL")
+    st.markdown(f"<h3 style='color:#38BDF8; font-size:24px;'>📋 Analysis Report: {record['filename']}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color:#CBD5E1; font-size:15px;'>⏱️ Timestamp: <b>{record['timestamp']}</b> &nbsp;|&nbsp; 🧪 Dilution: <b>10⁻{record['dilution_exp']}</b> &nbsp;|&nbsp; 💧 Plated Vol: <b>{record['plating_vol']} mL</b></p>", unsafe_allow_html=True)
 
-    # Metrics
     r1, r2, r3, r4 = st.columns(4)
     with r1:
-        st.markdown(f"""
-<div class="result-card">
-<div class="res-value" style="color:#38BDF8;">{record['total_colonies']}</div>
-<div class="res-label">Detected Colonies</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="result-card"><div class="res-value" style="color:#38BDF8;">{record['total_colonies']}</div><div class="res-label">Detected Colonies</div></div>""", unsafe_allow_html=True)
     with r2:
-        st.markdown(f"""
-<div class="result-card">
-<div class="res-value" style="color:#34D399;">{record['cfu_ml']:.2e}</div>
-<div class="res-label">Concentration (CFU/mL)</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="result-card"><div class="res-value" style="color:#34D399;">{record['cfu_ml']:.2e}</div><div class="res-label">Concentration (CFU/mL)</div></div>""", unsafe_allow_html=True)
     with r3:
-        st.markdown(f"""
-<div class="result-card">
-<div class="res-value" style="color:#C084FC;">10⁻{record['dilution_exp']}</div>
-<div class="res-label">Dilution Factor</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="result-card"><div class="res-value" style="color:#C084FC;">10⁻{record['dilution_exp']}</div><div class="res-label">Dilution Factor</div></div>""", unsafe_allow_html=True)
     with r4:
         avg_sz = round(np.mean([c["Area (px²)"] for c in record['colonies_data']]), 1) if record['total_colonies'] > 0 else 0
-        st.markdown(f"""
-<div class="result-card">
-<div class="res-value" style="color:#FBBF24;">{avg_sz}</div>
-<div class="res-label">Avg Area (px²)</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="result-card"><div class="res-value" style="color:#FBBF24;">{avg_sz}</div><div class="res-label">Avg Area (px²)</div></div>""", unsafe_allow_html=True)
 
     st.write("")
     tab1, tab2, tab3 = st.tabs(["📸 Visual Overlay", "📊 Phenotype Analytics", "📥 Export & Reports"])
 
     with tab1:
-        st.markdown("<p style='color:#38BDF8; font-weight:600;'>Color Legend: 🔵 Cyan = Small | 🟢 Green = Medium | 🟡 Amber = Large</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#38BDF8; font-size:16px; font-weight:700;'>Ring Color Code: 🔵 Cyan = Small | 🟢 Green = Medium | 🟡 Amber = Large</p>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown("<h4 style='color:#CBD5E1;'>Original Plate</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color:#F8FAFC; font-size:18px;'>Original Agar Plate</h4>", unsafe_allow_html=True)
             st.image(record['img_rgb'], use_container_width=True)
         with col2:
-            st.markdown("<h4 style='color:#34D399;'>AI Detected Overlay</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color:#34D399; font-size:18px;'>AI Segmented Overlay</h4>", unsafe_allow_html=True)
             st.image(record['annotated_img'], use_container_width=True)
 
     with tab2:
@@ -290,10 +377,10 @@ def display_full_report(record):
                 st.markdown("<h4 style='color:#38BDF8;'>Colonies by Phenotype</h4>", unsafe_allow_html=True)
                 st.bar_chart(df["Phenotype"].value_counts())
             with c2:
-                st.markdown("<h4 style='color:#34D399;'>Area Distribution (px²)</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='color:#34D399;'>Colony Area Distribution (px²)</h4>", unsafe_allow_html=True)
                 st.area_chart(df["Area (px²)"])
         else:
-            st.warning("No colonies detected within parameters.")
+            st.warning("No colonies detected within current threshold limits.")
 
     with tab3:
         if record['total_colonies'] > 0:
@@ -302,19 +389,18 @@ def display_full_report(record):
             dl1, dl2 = st.columns(2)
             with dl1:
                 csv_bytes = df.to_csv(index=False).encode("utf-8")
-                st.download_button("📄 Download CSV Data", data=csv_bytes, file_name=f"{record['filename']}_report.csv", mime="text/csv", key=f"csv_{record['id']}")
+                st.download_button("📄 Download CSV Report", data=csv_bytes, file_name=f"{record['filename']}_report.csv", mime="text/csv", key=f"csv_{record['id']}")
             with dl2:
                 pil_annotated = Image.fromarray(record['annotated_img'])
                 buf = io.BytesIO()
                 pil_annotated.save(buf, format="PNG")
-                st.download_button("🖼️ Download Annotated Plate (PNG)", data=buf.getvalue(), file_name=f"{record['filename']}_annotated.png", mime="image/png", key=f"png_{record['id']}")
+                st.download_button("🖼️ Download Annotated Image (PNG)", data=buf.getvalue(), file_name=f"{record['filename']}_annotated.png", mime="image/png", key=f"png_{record['id']}")
 
 
 # ==========================================
 # MODE 1: ANALYZE NEW PLATE
 # ==========================================
 if nav_choice == "🔬 Analyze New Plate":
-    # Sidebar
     with st.sidebar:
         st.markdown("### 🎛️ Lab Control Panel")
         with st.expander("🔬 Detection & Sensitivity", expanded=True):
@@ -331,13 +417,42 @@ if nav_choice == "🔬 Analyze New Plate":
     uploaded_file = st.file_uploader("📤 Upload Petri Dish Image (JPG, PNG, JPEG)", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is None:
+        # Top 3 Feature Cards
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.markdown("""<div class="result-card"><h4 style="color:#38BDF8; margin:0 0 6px 0;">🎯 Smart Masking</h4><p style="color:#CBD5E1; font-size:13px; margin:0;">Auto-masks petri rims & glare to count agar colonies only.</p></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="info-card"><h3 style="color:#38BDF8;">🎯 Smart Dish Isolation</h3><p>Automatically masks plastic petri dish edges and light reflections so only valid microbial colonies on the agar surface are counted.</p></div>""", unsafe_allow_html=True)
         with c2:
-            st.markdown("""<div class="result-card"><h4 style="color:#34D399; margin:0 0 6px 0;">🧬 Phenotyping</h4><p style="color:#CBD5E1; font-size:13px; margin:0;">Categorizes into Small, Medium, and Large phenotypes.</p></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="info-card"><h3 style="color:#34D399;">🧬 Phenotype Classification</h3><p>Segments individual colonies and classifies them into <b>Small (Punctiform)</b>, <b>Medium (Circular)</b>, and <b>Large (Spreading)</b> morphologies.</p></div>""", unsafe_allow_html=True)
         with c3:
-            st.markdown("""<div class="result-card"><h4 style="color:#C084FC; margin:0 0 6px 0;">📜 History Tracking</h4><p style="color:#CBD5E1; font-size:13px; margin:0;">Auto-logs past uploads with 1-click reload access.</p></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="info-card"><h3 style="color:#C084FC;">📜 1-Click History Archive</h3><p>Every scanned agar plate is automatically logged with its timestamp, CFU/mL result, and visual overlay for instant recall anytime.</p></div>""", unsafe_allow_html=True)
+
+        # Bottom Detailed Lab Protocol & Reference Section (Fills bottom space meaningfully)
+        b1, b2 = st.columns(2)
+        with b1:
+            st.markdown("""
+<div class="info-card">
+<h3 style="color:#FBBF24;">🧪 Standard Microbiology Counting Protocol</h3>
+<ul>
+<li><b>Step 1 — Capture Clear Plate Photo:</b> Place the petri dish against a uniform contrasting background with minimal glare.</li>
+<li><b>Step 2 — Calibrate Threshold:</b> Use the left sidebar sliders to match colony contrast and filter out tiny agar bubbles.</li>
+<li><b>Step 3 — Set Serial Dilution:</b> Enter your dilution exponent (e.g., 10⁻⁵) and inoculum volume (typically 0.1 mL) for automatic CFU/mL calculation.</li>
+<li><b>Statistically Valid Range:</b> Standard microbiology guidelines recommend plates containing <b>30 to 300 colonies</b> for accurate CFU estimation.</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
+        with b2:
+            st.markdown("""
+<div class="info-card">
+<h3 style="color:#F472B6;">🧫 Colony Phenotype & Morphology Reference</h3>
+<ul>
+<li><b style="color:#38BDF8;">🔵 Small / Punctiform (&lt; 120 px²):</b> Pinpoint colonies typical of slow-growing or high-density bacterial cultures.</li>
+<li><b style="color:#34D399;">🟢 Medium / Circular (120 – 500 px²):</b> Well-isolated, uniform round colonies ideal for pure culture sub-culturing.</li>
+<li><b style="color:#FBBF24;">🟡 Large / Spreading (&gt; 500 px²):</b> Broad or mucoid colonies often seen in motile strains or nutrient-rich agar media.</li>
+<li><b>Formula Applied:</b> <code>CFU/mL = (Colony Count × 10^Dilution) / Plated Volume (mL)</code></li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
+
     else:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
@@ -385,69 +500,4 @@ if nav_choice == "🔬 Analyze New Plate":
                     "X": int(x),
                     "Y": int(y),
                     "Radius (px)": round(r, 2),
-                    "Area (px²)": round(area, 2)
-                })
-                cid += 1
-
-        # Stamp watermark
-        font_scale = max(0.5, w / 1100.0)
-        cv2.putText(annotated_img, "Created by Sahil Kumar | BioCount AI", (16, h - 18), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (56, 189, 248), 2, cv2.LINE_AA)
-
-        total_colonies = len(colonies_data)
-        dilution_factor = 10 ** dilution_exp
-        cfu_ml = (total_colonies * dilution_factor) / plating_vol if plating_vol > 0 else 0
-
-        # Save to History (if new upload)
-        file_signature = f"{uploaded_file.name}_{uploaded_file.size}"
-        if st.session_state["last_processed_file"] != file_signature:
-            record_entry = {
-                "id": len(st.session_state["history"]) + 1,
-                "filename": uploaded_file.name,
-                "timestamp": datetime.now().strftime("%Y-%m-%d %I:%M %p"),
-                "img_rgb": img_rgb,
-                "annotated_img": annotated_img,
-                "colonies_data": colonies_data,
-                "total_colonies": total_colonies,
-                "dilution_exp": dilution_exp,
-                "plating_vol": plating_vol,
-                "cfu_ml": cfu_ml
-            }
-            st.session_state["history"].insert(0, record_entry)
-            st.session_state["last_processed_file"] = file_signature
-
-        # Display Current Results
-        display_full_report(st.session_state["history"][0])
-
-
-# ==========================================
-# MODE 2: PLATE HISTORY ARCHIVE & PAST SEARCHES
-# ==========================================
-else:
-    st.markdown("### 📜 Past Plate Analysis History")
-    
-    if len(st.session_state["history"]) == 0:
-        st.info("No plates analyzed in this session yet. Upload a petri dish in 'Analyze New Plate' mode to see history here.")
-    else:
-        # History Table View
-        col_list, col_preview = st.columns([1.1, 1.9])
-        
-        with col_list:
-            st.markdown("#### 📁 Uploaded Plates")
-            for idx, item in enumerate(st.session_state["history"]):
-                with st.container():
-                    st.markdown(f"""
-<div style="background:rgba(15,23,42,0.9); border:1px solid rgba(56,189,248,0.3); border-radius:10px; padding:12px; margin-bottom:10px;">
-    <div style="font-weight:700; color:#38BDF8; font-size:15px;">#{item['id']} {item['filename']}</div>
-    <div style="color:#94A3B8; font-size:12px; margin:3px 0 6px 0;">⏱️ {item['timestamp']}</div>
-    <div style="color:#34D399; font-weight:600; font-size:13px;">🦠 Colonies: {item['total_colonies']} &nbsp;|&nbsp; 🧪 {item['cfu_ml']:.2e} CFU/mL</div>
-</div>
-""", unsafe_allow_html=True)
-                    if st.button(f"🔍 View Full Result", key=f"hist_btn_{item['id']}"):
-                        st.session_state["view_history_idx"] = idx
-
-        with col_preview:
-            # Show either selected record or the most recent one
-            sel_idx = st.session_state["view_history_idx"] if st.session_state["view_history_idx"] is not None else 0
-            if 0 <= sel_idx < len(st.session_state["history"]):
-                selected_item = st.session_state["history"][sel_idx]
-                display_full_report(selected_item)
+                 
